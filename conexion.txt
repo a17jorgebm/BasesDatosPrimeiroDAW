@@ -1,0 +1,5 @@
+puerto: 3306
+usuario: root
+contraseña: abc123.
+
+Windows Service Name: MySQL80

@@ -1,0 +1,267 @@
+CRUD--> principais accions que faremos nunha base de datos(CREATE, READ, UPDATE, DELETE)
+
+ORDEN SENTENCIAS:
+	1.FROM, including JOINs
+	2.WHERE
+	3.GROUP BY
+	4.HAVING
+	5.WINDOW functions
+	6.SELECT
+	7.DISTINCT
+	8.UNION
+	9.ORDER BY
+	10.LIMIT and OFFSET
+
+FACER COMENTARIOS
+os comentarios fanse poñendo -- ao principio
+BASES DE DATOS-------------------------------------------------------------------------------------------------
+create database nomeBD; -->crea a base de datos co nome nomeBD
+show databases; --> enseña todas as bd creadas
+use nomeBD; --> as proximas operacións que fagamos faranse na bd indicada
+TABLAS---------------------------------------------------------------------------------------------------------
+CREATE TABLE-------------------------------------------
+CREATE TABLE `animales`( --> crea a taboa animales coas columnas indicadas nos parentesis
+	`id` int NOT NULL AUTO_INCREMENT, --> crea a columna chamada id de tipo int e autocremental o cal non pode ser nulo
+	`tipo` varchar(255) DEFAULT NULL, --> crea a columna tipo de tipo varchar(lonxitude max de 255) de cun valor por defecto nulo
+	`estado` varchar(255) DEFAULT NULL, --> o mesmo ca a de tipo para co nome estado
+	PRIMARY KEY (`id`) --> asigna como clave primaria da tabla a columna id
+);
+
+FOREING KEYS----------------------
+Creamos a tabla users, a cal usaremos despois na tabla productos para establecer a foreing key
+CREATE TABLE users(
+	id int not null auto_increment,
+    nome varchar(50) not null,
+    edad int not null,
+    primary key(id)
+);
+Ahora creamos a tabla productos a cal vai ter unha columna creado_por que vai ser unha foreing key da tabla users
+create table productos(
+	id int not null AUTO_INCREMENT,
+    nome varchar(100) NOT NULL,
+    creado_por int not null, --> como vai ser unha foreing key ten que ser do mismo tipo que o valor da outra tabla
+    marca varchar(50) not null,
+    PRIMARY KEY(id),
+    foreign key(creado_por) references users(id) --> establecemos que a columna creado_por será unha foreing key que fai referencia ao campo id ta taboa users
+);
+
+ON UPDATE E ON DELETE------------------------------
+ON DELETE aplicase cando intentamos borrar unha fila dunha taboa pai que ten tablas fillas(é dicir que nunha tabla hai unha foireign key que fai referencia a esta)
+ON DELETE RESTRICTED (É O QUE SE APLICA POR DEFECTO)--> non permite borrar a fila ata que non teña fillos
+ON DELETE CASCADE --> borra tanto a fila coma todos os seus fillos
+ON DELETE SET NULL --> borra a fila e nos fillos pon o campo da FK a null (obviamente esta columna no fillo non pode ser NOT NULL xa que da erro)
+---
+ON UPDATE aplicase cando o valor referenciado do pai cambia(non se usa moito, xa que as claves primarias non se cambian practicamente)
+ON DELETE RESTRICTED--> non che deixa cambiar o valor se ten algun fillo
+ON DELETE CASCADE --> cambia o valor tanto no pai coma no fillo
+ON DELETE SET NULL --> cambia o valor no pai e pono a null no fillo
+
+RENOMBRAR TABLA----------------
+rename table productos to producto;--> cambia o nome da tabla productos a producto
+
+BORRAR TABLA-------------------
+DROP TABLE nomeTabla;
+
+INSERT-------------------------------------------------
+INSERT INTO animales(tipo,estado) VALUES ('chanchito','feliz');
+INSERT INTO animales(tipo,estado) VALUES ('dragon','feliz');
+INSERT INTO animales(tipo,estado) VALUES ('felipe','triste');
+
+INSERT NUNHA LINEA-------------------------------------
+podese meter todos o datos xuntos solo con un insert
+INSERT INTO producto (nome,creado_por,marca)
+VALUES
+    ('alpaca',2,'aston martin'),
+    ('ipad',2,'apple'),
+    ('ibiza',2,'seat'),
+    ('alpaca',2,'aston martin'),
+    ('alpaca',2,'aston martin');
+
+INSERT CON LOS DATOS DE OTRA TABLA, AÑADIENDO UN CAMPO EXTRA(Cod_Curso)--------
+INSERT INTO alumnado(Nombre,Apellidos,Sexo,Fecha_Nac,Cod_Curso)
+select Nombre,Apellidos,Sexo,Fecha_Nac,1 from alumnado_nuevo;
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SELECT--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SELECT * FROM animales; --> devolve todos os datos da tabla animales
+LIMIT--------------
+SELECT * FROM users limit 1; --> selecciona solo 1 fila da tabla users
+WHERE----------------------------------------------------
+SELECT * FROM animales WHERE id=1; --> devolve os registros da tabla animales co id 1
+SELECT * FROM animales WHERE estado='triste'; --> devolv os registros da tabla animales que teñan o valor triste na columna estado
+SELECT * FROM users WHERE edad > 21; --> devolve os registros nos cales o campo edad sexa maior ca 21
+AND---------------------------------------------
+podense combinar distintas condicións co operador AND
+SELECT * FROM animales WHERE id=4 AND tipo='dragon'; --> devolve os registros co id 4 e co tipo dragon da tabla animales
+SELECT * FROM users WHERE edad >=21 AND nome='jorge'; --> devolve os registros con edad maior ou igual a 21 e con nome jorge
+OR----------------------------------------------
+devolve os registros nos que se cumpla unha das condicions
+SELECT * FROM users WHERE edad > 21 OR nome='jorge'; --> devolve os registros onda a edad sexa maior ca 21 ou o nome sexa jorge
+NEGACION----------------------------------------
+devolve os registros que non cumplan coa condicions indicada, indicase con un !=
+SELECT * FROM users WHERE edad != 22; --> devolve os rexistros nos cales a edad non é 22
+RANGO DE DATOS----------------------------------
+SELECT * FROM users WHERE edad between 15 and 30;--> devolve os registros con unha edad entre 15 e 30 (inluidos)
+LIKE--------------------------------------------
+%palabra ao principio --> ten que acabar nesa palabra e pode levar calquera cousa antes
+palabra% --> ten que empezar por esa palabra, despois pode levar calquera cousa
+%palabra% --> pode levar calquer cousa antes e acabar por calquera cousa, pero ten que ter esa palabra
+EJEMPLOS--
+SELECT * FROM users WHERE nome like '%org%'; --> devolve os rexistros que no nome teñan org en algun lado, por ejemplo jorge
+ORDER BY----------------------------------------
+ordena os registros da maneira que lle indiquemos
+asc --> de menor a maior
+desc --> de maior a menor
+EJEMPLO--
+SELECT * FROM users ORDER BY edad desc; --> selecciona todos os campos da tabla usuarios ordenados de maior a menor segun a edad
+MAXIMO E MINIMO---------------------------------
+max(nomeColumna) --> selecciona o valor maximo dos campos de esa columna
+min(nomeColumna) --> selecciona o valor minimos dos campos de esa columna
+EXEMPLO--
+SELECT max(edad) AS maior FROM users; --> selecciona o valor mais grande da columna edad da tabla users e mostrao como maior
+SELECT min(edad) AS menor FROM users; --> o mesmo pero seleccionando o minimo e mostrandoo como menor
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+SELECT SIN * -------------------------------------------------------------------------------------------------------------------------------------
+podemos seleccionar solo as columnas que nos interesan en vez de collelas todas
+SELECT id, nome FROM users; --> collemos as columnas id e nome da tabla users
+ALIAS--------------------------------------------
+podemos chamar as columnas de outra maneira no momento de mostrar a busqueda
+SELECT id as identificador, nome as nomeDeUsuario FROM users; --> mostra as columna id chamandoa identificador e a columna nome chamandoa nomeDeUsuario da tabla users
+SELECT nome as nome_usuario FROM users WHERE edad >21; --> mostra os nomes dos usuarios da taboa users que teñen mais de 21 anos mostrandoo como nome_usuario
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+!!!!!!!!!!!!!!!!!!APUNTE DELETE-UPDATE: por defecto no where solo lle podemos indicar o id da fila, calquer outro campo vai dar erro(por seguridad)
+UPDATE---------------------------------------------------------------------------------------------------------------------------
+UPDATE animales SET estado='feliz' WHERE id=5; --> establece o valor da columna estado a feliz nas filas que teñan o id 5,da tabla animales
+
+UPDATE CON UNHA RESTA DO PROPIO VALOR----------
+UPDATE profesorado
+SET Antiguedad=(Antiguedad-2)
+WHERE Antiguedad>5;
+
+DELETE---------------------------------------------------------------------------------------------------------------------------
+DELETE FROM animales WHERE id=3; --> borra a fila con id 3 da tabla animales
+DELETE FROM animales WHERE estado='feliz'; --> borra todas as filas nas que o estado sexa feliz(por defecto vai dar erro)
+
+DELETE CON UN SELECT DA MISMA TABLA----------
+#Se non se fai o select * from antes que o segundo select da erro xa que non se pode facer un delete con un select a propia tabla
+DELETE FROM alumnado
+WHERE Codigo in (
+	SELECT * FROM(
+		SELECT a.Codigo
+		FROM alumnado a
+		JOIN cursos c on c.Codigo=a.Cod_Curso
+		WHERE c.Cod_Profe=1
+	) as ALUMNOS_ELIMINAR
+);
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+JOIN----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+LEFT JOIN---------------------------------------
+busca os rexistros da taboa da esquerda e ademais se encontra algún rexistro relacionado con el da taboa da dereita tamen o enseña
+podese facer unha consulta a cal enseñe por ejemplo todos os usuarios xunto con todos os productos que fixeron, xuntando as tablas users e producto
+EJEMPLO
+temos estas tablas: users - producto
+Faremos un leftJoin de estas, polo que enseñara todos os usuarios, e se un producto esta asociado a algun usuario mediante a foreing key, enseñao tamen
+FORMA MAIS COMPLETA--------
+SELECT usuario.id as id_usuario, usuario.nome as nome_usuario, producto.nome as nome_producto from users usuario(este é o alias)
+left join producto producto(alias, ainda que sea igual) on usuario.id=producto.creado_por; --> forma mais completa poñendo nomes as columnas e alias as tablas
+Por ejemplo o mismo pero filtrandoo polo nome de usuario, que sea igual a eva
+SELECT usuario.id as id_usuario, usuario.nome as nome_usuario, producto.nome as nome_producto
+FROM users usuario left join producto producto on usuario.id=producto.creado_por
+WHERE usuario.nome='eva'; --> pilla todos os productos relacionados co usuario eva
+FORMA MAIS SIMPLE--------------
+SELECT users.id, users.nome, producto.nome from users left join producto on users.id=producto.creado_por; --> forma mais simple sen poñer alias nin nomes de columnas
+EXEMPLO 2---
+Temos as taboas productos, marcas, usuarios.
+Queremos mostrar o nome do producto, a marca e o usuario que o creou. Faremos esto:
+SELECT p.nome as nome_producto, m.nome as marca, u.nome as creador
+FROM productos p
+LEFT JOIN marcas m
+ON p.marca=m.id
+LEFT JOIN usuarios u
+ON p.creado_por=u.id;
+
+RIGHT JOIN---------------------------------------
+mostra os rexistros da taboa da dereita e se encontra algún rexistro da taboa da esquerda relacionado tamen o enseña
+teremos as taboas users-producto
+por exemplo faremos que ensine todos os productos co seu respectivo creador se o ten
+neste caso por ejemplo se un usuario non creou ningun producto, non o vai enseñar
+SELECT usuario.id as id_usuario, usuario.nome as nome_usuario, producto.nome as nome_producto
+from users usuario right join producto producto on usuario.id=producto.creado_por; --> mostra todos os productos, ensinando o seu respectivo creador
+
+INNER JOIN---------------------------------------
+mostra todos os rexistros que estan relacionados entre as duas taboas
+teremos as taboas users-producto
+SELECT usuario.id as id_usuario, usuario.nome as nome_usuario, producto.nome as nome_producto
+from users usuario inner join producto producto on usuario.id=producto.creado_por; --> mostrará só os rexistros que estean relacionados entre si
+se un usuario non tivera ningun producto NON o mostra e se un producto non tivera ningun usuario asociado TAMPOUCO
+
+CROSS JOIN---------------------------------------
+mostra cada un dos rexistros dunha das taboas con cada un dos rexistros da outra taboa
+teremos as taboas users-producto
+é dicir que por cada usuario na taboa users vai mostrar todos os productos da taboa producto
+SELECT *
+FROM users
+CROSS JOIN producto; --> que seria o mesmo que facer SELECT * from users,producto;
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+GROUP BY----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Serve para agrupar rexistros
+Por exemplo podemos facer que todos os coches de unha marca aparezan so como un rexistro:
+SELECT marca, count(id) as cantos FROM producto p GROUP BY(marca); --> mostrara o nome da marca e cantos productos ten cada unha
+--
+Tamen que mostre cantos productos creou cada usuario
+SELECT u.nome, count(p.id) as cantos_creou FROM users u LEFT JOIN producto p ON u.id=p.creado_por GROUP BY(p.creado_por);
+
+HAVING------------------------------------------------------------
+Tamen podemos incluir unha condición na busqueda ao final
+Facemos a mesma consulta anterior pero facendo que so aparezan os usuarios con 2 ou mais productos creados
+SELECT u.nome, count(p.id) as cantos_creou FROM users u LEFT JOIN producto p ON u.id=p.creado_por GROUP BY(p.creado_por) HAVING COUNT(p.id)>=2;
+
+
+ALTER TABLE----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ALTER TABLE `reclama_aviva`.`incidencias`
+ADD COLUMN `fecha_cierre` DATETIME NULL AFTER `fecha`; --> engade a taboa incidencias da BD reclama_aviva unha nova columna chamada fecha_cierre(DATETIME que pode ser null) despois da columna fecha
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
